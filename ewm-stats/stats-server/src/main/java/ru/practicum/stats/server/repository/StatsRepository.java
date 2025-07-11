@@ -12,10 +12,10 @@ import java.util.Collection;
 
 @Repository
 public interface StatsRepository extends JpaRepository<EndpointHit, Integer> {
-    @Query("SELECT new ru.ewm.stats.dto.ViewStats(h.app, h.uri, " +
-            "CASE WHEN :unique = true THEN COUNT(DISTINCT h.user_ip) ELSE COUNT(h) END) " +
+    @Query("SELECT new ru.practicum.stats.server.model.ViewStats(h.app, h.uri, " +
+            "CASE WHEN :unique = true THEN COUNT(DISTINCT h.ip) ELSE COUNT(h) END) " +
             "FROM EndpointHit h " +
-            "WHERE h.creation_date BETWEEN :start AND :end " +
+            "WHERE h.created BETWEEN :start AND :end " +
             "AND (h.uri IN :uris) " +
             "GROUP BY h.app, h.uri " +
             "ORDER BY CASE WHEN :unique = true THEN COUNT(DISTINCT h.ip) ELSE COUNT(h) END DESC")
@@ -24,10 +24,10 @@ public interface StatsRepository extends JpaRepository<EndpointHit, Integer> {
                                     @Param("uris") Collection<String> uris,
                                     @Param("unique") Boolean unique);
 
-    @Query("SELECT new ru.ewm.stats.dto.ViewStats(h.app, h.uri, " +
-            "CASE WHEN :unique = true THEN COUNT(DISTINCT h.user_ip) ELSE COUNT(h) END) " +
+    @Query("SELECT new ru.practicum.stats.server.model.ViewStats(h.app, h.uri, " +
+            "CASE WHEN :unique = true THEN COUNT(DISTINCT h.ip) ELSE COUNT(h) END) " +
             "FROM EndpointHit h " +
-            "WHERE h.creation_date BETWEEN :start AND :end " +
+            "WHERE h.created BETWEEN :start AND :end " +
             "GROUP BY h.app, h.uri " +
             "ORDER BY CASE WHEN :unique = true THEN COUNT(DISTINCT h.ip) ELSE COUNT(h) END DESC")
     Collection<ViewStats> findStats(@Param("start") LocalDateTime start,
