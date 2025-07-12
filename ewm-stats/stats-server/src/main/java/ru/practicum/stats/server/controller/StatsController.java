@@ -14,6 +14,7 @@ import ru.practicum.stats.dto.ViewStatsDto;
 import ru.practicum.stats.server.service.StatsService;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 
 @Slf4j
@@ -21,6 +22,8 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class StatsController {
     private final StatsService statsService;
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/hit")
@@ -30,11 +33,13 @@ public class StatsController {
     }
 
     @GetMapping("/stats")
-    public Collection<ViewStatsDto> getStatistics(@RequestParam LocalDateTime start,
-                                                  @RequestParam LocalDateTime end,
+    public Collection<ViewStatsDto> getStatistics(@RequestParam String start,
+                                                  @RequestParam String end,
                                                   @RequestParam(required = false) Collection<String> uris,
                                                   @RequestParam(defaultValue = "false") Boolean unique) {
         log.info("Запрос статистики: start={}, end={}, uris={}, unique={}", start, end, uris, unique);
-        return statsService.getStatistics(start, end, uris, unique);
+        return statsService.getStatistics(
+                LocalDateTime.parse(start, dateTimeFormatter), LocalDateTime.parse(end, dateTimeFormatter), uris, unique
+        );
     }
 }
