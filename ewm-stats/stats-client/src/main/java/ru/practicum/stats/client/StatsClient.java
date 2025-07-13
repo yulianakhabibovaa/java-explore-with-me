@@ -25,7 +25,7 @@ import java.util.Map;
 @Service
 public class StatsClient {
     private final RestTemplate rest;
-    private static final String BASE_PATH = "";
+    private static final String BASE_PATH = "/";
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Autowired

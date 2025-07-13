@@ -24,7 +24,6 @@ public class StatsController {
     private final StatsService statsService;
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/hit")
     public void saveHit(@RequestBody EndpointHitDto hit) {

@@ -32,6 +32,6 @@ public class EndpointHit {
     private String uri;
     @Column(nullable = false, name = "user_ip")
     private String ip;
-    @Column(nullable = false, name = "creation_date")
-    LocalDateTime created;
+    @Column(nullable = false, name = "created")
+    private LocalDateTime created;
 }

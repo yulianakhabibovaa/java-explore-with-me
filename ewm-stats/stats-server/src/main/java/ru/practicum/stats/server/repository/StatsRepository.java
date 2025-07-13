@@ -19,10 +19,10 @@ public interface StatsRepository extends JpaRepository<EndpointHit, Integer> {
             "AND (h.uri IN :uris) " +
             "GROUP BY h.app, h.uri " +
             "ORDER BY CASE WHEN :unique = true THEN COUNT(DISTINCT h.ip) ELSE COUNT(h) END DESC")
-    Collection<ViewStats> findStats(@Param("start") LocalDateTime start,
-                                    @Param("end") LocalDateTime end,
-                                    @Param("uris") Collection<String> uris,
-                                    @Param("unique") Boolean unique);
+    Collection<ViewStats> findStatsForUris(@Param("start") LocalDateTime start,
+                                           @Param("end") LocalDateTime end,
+                                           @Param("uris") Collection<String> uris,
+                                           @Param("unique") Boolean unique);
 
     @Query("SELECT new ru.practicum.stats.server.model.ViewStats(h.app, h.uri, " +
             "CASE WHEN :unique = true THEN COUNT(DISTINCT h.ip) ELSE COUNT(h) END) " +
@@ -30,8 +30,8 @@ public interface StatsRepository extends JpaRepository<EndpointHit, Integer> {
             "WHERE h.created BETWEEN :start AND :end " +
             "GROUP BY h.app, h.uri " +
             "ORDER BY CASE WHEN :unique = true THEN COUNT(DISTINCT h.ip) ELSE COUNT(h) END DESC")
-    Collection<ViewStats> findStats(@Param("start") LocalDateTime start,
-                                    @Param("end") LocalDateTime end,
-                                    @Param("unique") Boolean unique);
+    Collection<ViewStats> findAllStats(@Param("start") LocalDateTime start,
+                                       @Param("end") LocalDateTime end,
+                                       @Param("unique") Boolean unique);
 
 }

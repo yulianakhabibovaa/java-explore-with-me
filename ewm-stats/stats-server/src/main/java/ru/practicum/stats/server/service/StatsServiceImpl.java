@@ -28,8 +28,8 @@ public class StatsServiceImpl implements StatsService {
     @Override
     public Collection<ViewStatsDto> getStatistics(LocalDateTime start, LocalDateTime end, Collection<String> uris, Boolean unique) {
         if (uris == null || uris.isEmpty()) {
-            return StatsMapper.toViewStatsDtos(repository.findStats(start, end, unique));
+            return StatsMapper.toViewStatsDtos(repository.findAllStats(start, end, unique));
         }
-        return StatsMapper.toViewStatsDtos(repository.findStats(start, end, uris, unique));
+        return StatsMapper.toViewStatsDtos(repository.findStatsForUris(start, end, uris, unique));
     }
 }
