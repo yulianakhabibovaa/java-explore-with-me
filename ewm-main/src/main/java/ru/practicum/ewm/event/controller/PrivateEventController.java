@@ -2,7 +2,8 @@ package ru.practicum.ewm.event.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -38,16 +39,17 @@ public class PrivateEventController {
 
     @GetMapping
     public List<EventShortDto> getEvents(
-            @PathVariable long userId,
-            @RequestParam(defaultValue = "0") @Min(0) int from,
-            @RequestParam(defaultValue = "10") int size) {
+            @PathVariable @NotNull @PositiveOrZero Long userId,
+            @RequestParam(defaultValue = "0") @Min(0) Integer from,
+            @RequestParam(defaultValue = "10") @Min(1) Integer size
+    ) {
         return eventService.getUserEvents(userId, from, size);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto createEvent(
-            @PathVariable Long userId,
+            @PathVariable @NotNull @PositiveOrZero Long userId,
             @Valid @RequestBody NewEventDto newEventDto
     ) {
         return eventService.createEvent(userId, newEventDto);
@@ -55,8 +57,8 @@ public class PrivateEventController {
 
     @PatchMapping("/{eventId}")
     public EventFullDto updateEvent(
-            @PathVariable Long userId,
-            @PathVariable Long eventId,
+            @PathVariable @NotNull @PositiveOrZero Long userId,
+            @PathVariable @NotNull @PositiveOrZero Long eventId,
             @Valid @RequestBody UpdateEventUserRequest updateRequest
     ) {
         return eventService.updateEventByUser(userId, eventId, updateRequest);
@@ -64,23 +66,24 @@ public class PrivateEventController {
 
     @GetMapping("/{eventId}")
     public EventFullDto getEvent(
-            @PathVariable Long userId,
-            @PathVariable Long eventId
+            @PathVariable @NotNull @PositiveOrZero Long userId,
+            @PathVariable @NotNull @PositiveOrZero Long eventId
     ) {
         return eventService.getUserEvent(userId, eventId);
     }
 
     @GetMapping("/{eventId}/requests")
     public Collection<ParticipationRequestDto> getEventRequests(
-            @PathVariable @Positive Long userId,
-            @PathVariable @Positive Long eventId) {
+            @PathVariable @NotNull @PositiveOrZero Long userId,
+            @PathVariable @NotNull @PositiveOrZero Long eventId
+    ) {
         return requestService.getEventRequests(userId, eventId);
     }
 
     @PatchMapping("/{eventId}/requests")
     public EventRequestStatusUpdateResult updateRequestStatus(
-            @PathVariable @Positive Long userId,
-            @PathVariable @Positive Long eventId,
+            @PathVariable @NotNull @PositiveOrZero Long userId,
+            @PathVariable @NotNull @PositiveOrZero Long eventId,
             @RequestBody @Valid EventRequestStatusUpdateRequest updateRequest) {
         return requestService.updateRequestStatus(userId, eventId, updateRequest);
     }
