@@ -67,6 +67,7 @@ public class EventServiceImpl implements EventService {
         Event event = EventMapper.toEvent(newEventDto);
         event.setCategory(category);
         event.setInitiator(initiator);
+        event.setCreatedOn(LocalDateTime.now());
         event.setState(EventState.PENDING);
 
         return EventMapper.toFullDto(eventRepository.save(event));
