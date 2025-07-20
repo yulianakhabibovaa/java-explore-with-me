@@ -18,8 +18,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     boolean existsByIdAndInitiatorId(Long eventId, Long userId);
 
-    @Query(value = "SELECT * FROM categories ORDER BY id OFFSET :offset LIMIT :limit", nativeQuery = true)
-    List<Event> findByInitiatorIdWithOffset(Long userId, @Param("offset") int offset, @Param("limit") int limit);
+    @Query(value = "SELECT * FROM categories WHERE initiator_id = :initiatorId ORDER BY id OFFSET :offset LIMIT :limit", nativeQuery = true)
+    List<Event> findByInitiatorIdWithOffset(@Param("initiatorId") Long userId, @Param("offset") int offset, @Param("limit") int limit);
 
     Optional<Event> findByIdAndInitiatorId(Long eventId, Long userId);
 
