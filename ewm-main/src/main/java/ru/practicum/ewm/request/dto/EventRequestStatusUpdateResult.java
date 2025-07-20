@@ -10,6 +10,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EventRequestStatusUpdateResult {
-    private List<ParticipationRequestDto> confirmedRequests;
-    private List<ParticipationRequestDto> rejectedRequests;
+    private List<ParticipationRequestDto> confirmedRequests = List.of();
+    private List<ParticipationRequestDto> rejectedRequests = List.of();
 }
