@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
+import ru.practicum.ewm.error.ConflictException;
 import ru.practicum.ewm.error.ForbiddenException;
 import ru.practicum.ewm.error.NotFoundException;
 import ru.practicum.ewm.error.ValidationException;
@@ -124,7 +125,7 @@ public class EventServiceImpl implements EventService {
         if (updateRequest.getStateAction() != null) {
             if (updateRequest.getStateAction() == UpdateEventAdminRequest.StateAction.PUBLISH_EVENT) {
                 if (event.getState() != EventState.PENDING) {
-                    throw new ForbiddenException("Cannot publish event that is not pending");
+                    throw new ConflictException("Cannot publish event that is not pending");
                 }
                 if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
                     throw new ForbiddenException("Event date must be at least 1 hour after publication");
