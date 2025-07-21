@@ -191,10 +191,19 @@ public class EventServiceImpl implements EventService {
                 pageRequest
         );
 
+        List<Long> eventIds = events.stream().map(Event::getId).toList();
+        Map<Long, Long> views = getViews(eventIds);
+        Map<Long, Long> confirmedRequests = getConfirmedRequests(eventIds);
+
         return events.stream()
                 .skip(from)
                 .limit(size)
-                .map(EventMapper::toFullDto)
+                .map(event -> {
+                    EventFullDto dto = EventMapper.toFullDto(event);
+                    dto.setViews(views.getOrDefault(event.getId(), 0L));
+                    dto.setConfirmedRequests(confirmedRequests.getOrDefault(event.getId(), 0L));
+                    return dto;
+                })
                 .toList();
     }
 

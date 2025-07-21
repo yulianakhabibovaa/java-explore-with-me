@@ -11,9 +11,7 @@ import ru.practicum.ewm.user.mapper.UserMapper;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.repository.UserRepository;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -35,15 +33,6 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> getUsers(List<Long> ids, int from, int size) {
         if (ids == null || ids.isEmpty()) {
             return UserMapper.toUserDtoList(userRepository.findUsersWithOffset(from, size));
-        }
-
-        Set<Long> existingIds = new HashSet<>(userRepository.findExistingIds(ids));
-        List<Long> missingIds = ids.stream()
-                .filter(id -> !existingIds.contains(id))
-                .toList();
-
-        if (!missingIds.isEmpty()) {
-            throw new NotFoundException("Users not found: " + missingIds);
         }
 
         return UserMapper.toUserDtoList(userRepository.findUsersByIdsWithOffset(ids, from, size));
