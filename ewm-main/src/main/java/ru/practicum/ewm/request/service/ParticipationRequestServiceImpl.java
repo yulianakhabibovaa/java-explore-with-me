@@ -89,6 +89,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
         if (request.getStatus().equals(RequestStatus.PENDING)) {
             request.setStatus(RequestStatus.CANCELED);
+            request.setCreated(request.getCreated());
             return RequestMapper.toDto(requestRepository.save(request));
         } else {
             throw new ConflictException("Cannot cancel request in state: " + request.getStatus());
