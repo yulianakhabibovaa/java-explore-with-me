@@ -14,6 +14,7 @@ import java.util.List;
 
 @UtilityClass
 public class EventMapper {
+    private final DateTimeFormatter DATE_TIME_FORMATER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public Event toEvent(NewEventDto dto) {
         return Event.builder()
@@ -34,15 +35,15 @@ public class EventMapper {
                 .annotation(event.getAnnotation())
                 .category(CategoryMapper.toDto(event.getCategory()))
                 .confirmedRequests(event.getConfirmedRequests())
-                .createdOn(event.getCreatedOn().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                .createdOn(event.getCreatedOn().format(DATE_TIME_FORMATER))
                 .description(event.getDescription())
-                .eventDate(event.getEventDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                .eventDate(event.getEventDate().format(DATE_TIME_FORMATER))
                 .initiator(UserMapper.toUserShortDto(event.getInitiator()))
                 .location(event.getLocation())
                 .paid(event.getPaid())
                 .participantLimit(event.getParticipantLimit())
                 .publishedOn(event.getPublishedOn() != null
-                        ? event.getPublishedOn().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                        ? event.getPublishedOn().format(DATE_TIME_FORMATER)
                         : null)
                 .requestModeration(event.getRequestModeration())
                 .state(event.getState().name())
@@ -57,7 +58,7 @@ public class EventMapper {
                 .annotation(event.getAnnotation())
                 .category(CategoryMapper.toDto(event.getCategory()))
                 .confirmedRequests(event.getConfirmedRequests())
-                .eventDate(event.getEventDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                .eventDate(event.getEventDate().format(DATE_TIME_FORMATER))
                 .initiator(UserMapper.toUserShortDto(event.getInitiator()))
                 .paid(event.getPaid())
                 .title(event.getTitle())
