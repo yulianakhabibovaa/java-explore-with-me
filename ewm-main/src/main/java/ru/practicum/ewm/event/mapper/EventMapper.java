@@ -14,7 +14,7 @@ import java.util.List;
 
 @UtilityClass
 public class EventMapper {
-    private final DateTimeFormatter DATE_TIME_FORMATER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public Event toEvent(NewEventDto dto) {
         return Event.builder()
@@ -35,15 +35,15 @@ public class EventMapper {
                 .annotation(event.getAnnotation())
                 .category(CategoryMapper.toDto(event.getCategory()))
                 .confirmedRequests(event.getConfirmedRequests())
-                .createdOn(event.getCreatedOn().format(DATE_TIME_FORMATER))
+                .createdOn(event.getCreatedOn().format(dateTimeFormatter))
                 .description(event.getDescription())
-                .eventDate(event.getEventDate().format(DATE_TIME_FORMATER))
+                .eventDate(event.getEventDate().format(dateTimeFormatter))
                 .initiator(UserMapper.toUserShortDto(event.getInitiator()))
                 .location(event.getLocation())
                 .paid(event.getPaid())
                 .participantLimit(event.getParticipantLimit())
                 .publishedOn(event.getPublishedOn() != null
-                        ? event.getPublishedOn().format(DATE_TIME_FORMATER)
+                        ? event.getPublishedOn().format(dateTimeFormatter)
                         : null)
                 .requestModeration(event.getRequestModeration())
                 .state(event.getState().name())
@@ -58,7 +58,7 @@ public class EventMapper {
                 .annotation(event.getAnnotation())
                 .category(CategoryMapper.toDto(event.getCategory()))
                 .confirmedRequests(event.getConfirmedRequests())
-                .eventDate(event.getEventDate().format(DATE_TIME_FORMATER))
+                .eventDate(event.getEventDate().format(dateTimeFormatter))
                 .initiator(UserMapper.toUserShortDto(event.getInitiator()))
                 .paid(event.getPaid())
                 .title(event.getTitle())
