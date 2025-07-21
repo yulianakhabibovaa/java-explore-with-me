@@ -210,7 +210,9 @@ public class EventServiceImpl implements EventService {
             throw new ValidationException("Start date must be before end date");
         }
 
-        PageRequest pageRequest = PageRequest.of(0, from + size, Sort.by(sort.toLowerCase()).descending());
+        PageRequest pageRequest = PageRequest.of(
+                0, from + size, sort == null ? Sort.unsorted() : Sort.by(sort.toLowerCase()).descending()
+        );
 
         List<Event> events = eventRepository.findPublicEvents(
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, pageRequest

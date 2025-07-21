@@ -5,10 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -38,6 +42,35 @@ public class ErrorHandler {
         );
     }
 
+    @ExceptionHandler(BindException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleBindException(BindException ex) {
+        List<String> errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> String.format("Parameter '%s': %s", error.getField(), error.getDefaultMessage()))
+                .toList();
+
+        return new ApiError(
+                errors,
+                "Invalid request parameters",
+                "Parameter validation failed",
+                HttpStatus.BAD_REQUEST.name(),
+                LocalDateTime.now().format(TIMESTAMP_FORMATTER)
+        );
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleMissingParams(MissingServletRequestParameterException ex) {
+        String error = String.format("Parameter '%s' is required", ex.getParameterName());
+        return new ApiError(
+                Collections.singletonList(error),
+                "Missing required parameter",
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST.name(),
+                LocalDateTime.now().format(TIMESTAMP_FORMATTER)
+        );
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleConstraintViolation(ConstraintViolationException ex) {
@@ -51,6 +84,32 @@ public class ErrorHandler {
                 HttpStatus.CONFLICT.name(),
                 "Integrity constraint has been violated",
                 "Database constraint violation",
+                LocalDateTime.now().format(TIMESTAMP_FORMATTER)
+        );
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String error = String.format("Parameter '%s' must be of type %s",
+                ex.getName(), ex.getRequiredType());
+        return new ApiError(
+                Collections.singletonList(error),
+                "Type mismatch",
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST.name(),
+                LocalDateTime.now().format(TIMESTAMP_FORMATTER)
+        );
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public ApiError handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+        return new ApiError(
+                Collections.emptyList(),
+                "Method not allowed",
+                ex.getMessage(),
+                HttpStatus.METHOD_NOT_ALLOWED.name(),
                 LocalDateTime.now().format(TIMESTAMP_FORMATTER)
         );
     }
