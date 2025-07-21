@@ -48,7 +48,7 @@ public class ParticipationRequest {
     private RequestStatus status;
 
     @CreatedDate
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(nullable = false, updatable = false)
     private LocalDateTime created;
 }
