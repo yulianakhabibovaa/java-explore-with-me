@@ -3,7 +3,6 @@ package ru.practicum.ewm.event.service;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.category.model.Category;
@@ -212,7 +211,7 @@ public class EventServiceImpl implements EventService {
         }
 
         PageRequest pageRequest = PageRequest.of(
-                0, from + size, sort == null ? Sort.unsorted() : Sort.by(sort.toLowerCase()).descending()
+                0, from + size
         );
 
         List<Event> events = eventRepository.findPublicEvents(
