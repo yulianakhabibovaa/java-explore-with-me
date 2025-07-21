@@ -137,4 +137,16 @@ public class ErrorHandler {
         );
         return new ResponseEntity<>(apiError, ex.getStatus());
     }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ApiError handleAllExceptions(Exception ex) {
+        return new ApiError(
+                Collections.emptyList(),
+                HttpStatus.INTERNAL_SERVER_ERROR.toString(),
+                "Internal server error",
+                ex.getMessage(),
+                LocalDateTime.now().format(TIMESTAMP_FORMATTER)
+        );
+    }
 }

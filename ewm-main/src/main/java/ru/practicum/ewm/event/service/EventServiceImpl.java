@@ -93,7 +93,7 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException("Event not found"));
 
         if (event.getState() != EventState.PENDING && event.getState() != EventState.CANCELED) {
-            throw new ForbiddenException("Only pending or canceled events can be changed");
+            throw new ConflictException("Only pending or canceled events can be changed");
         }
 
         if (updateRequest.getEventDate() != null
@@ -134,7 +134,7 @@ public class EventServiceImpl implements EventService {
                 event.setPublishedOn(LocalDateTime.now());
             } else if (updateRequest.getStateAction() == UpdateEventAdminRequest.StateAction.REJECT_EVENT) {
                 if (event.getState() == EventState.PUBLISHED) {
-                    throw new ForbiddenException("Cannot reject published event");
+                    throw new ConflictException("Cannot reject published event");
                 }
                 event.setState(EventState.CANCELED);
             }

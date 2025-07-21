@@ -45,6 +45,7 @@ public class Event {
     private Category category;
 
     @Column(name = "created_on", nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private LocalDateTime createdOn = LocalDateTime.now();
 
     @Column(length = 7000, nullable = false)
