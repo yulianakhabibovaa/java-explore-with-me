@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
+import ru.practicum.ewm.event.dto.EventsRequestDto;
 import ru.practicum.ewm.event.service.EventService;
 
 import java.time.LocalDateTime;
@@ -43,8 +44,18 @@ public class PublicEventController {
             @RequestParam(defaultValue = "10") @Positive int size,
             HttpServletRequest request
     ) {
-        return eventService.getShortEvents(
-                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, request
-        );
+        EventsRequestDto params = new EventsRequestDto();
+        params.setText(text);
+        params.setCategories(categories);
+        params.setPaid(paid);
+        params.setRangeStart((rangeStart != null) ? rangeStart : LocalDateTime.now());
+        params.setRangeEnd((rangeEnd != null) ? rangeEnd : LocalDateTime.now().plusYears(10));
+        params.setOnlyAvailable(onlyAvailable);
+        params.setFrom(from);
+        params.setSize(size);
+        params.setSort(sort);
+        params.setRequest(request);
+
+        return eventService.getShortEvents(params);
     }
 }

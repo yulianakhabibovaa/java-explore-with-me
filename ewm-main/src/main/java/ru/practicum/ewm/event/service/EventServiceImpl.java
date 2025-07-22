@@ -11,8 +11,10 @@ import ru.practicum.ewm.error.ConflictException;
 import ru.practicum.ewm.error.ForbiddenException;
 import ru.practicum.ewm.error.NotFoundException;
 import ru.practicum.ewm.error.ValidationException;
+import ru.practicum.ewm.event.dto.AdminEventsRequestDto;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
+import ru.practicum.ewm.event.dto.EventsRequestDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
 import ru.practicum.ewm.event.dto.UpdateEventAdminRequest;
 import ru.practicum.ewm.event.dto.UpdateEventUserRequest;
@@ -20,6 +22,8 @@ import ru.practicum.ewm.event.mapper.EventMapper;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.model.EventState;
 import ru.practicum.ewm.event.repository.EventRepository;
+import ru.practicum.ewm.request.model.RequestStatus;
+import ru.practicum.ewm.request.repository.ParticipationRequestRepository;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.repository.UserRepository;
 import ru.practicum.stats.client.StatsClient;
@@ -41,6 +45,7 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final ParticipationRequestRepository requestRepository;
     private final StatsClient statsClient;
 
     @Override
@@ -64,12 +69,7 @@ public class EventServiceImpl implements EventService {
             throw new ForbiddenException("Event date must be at least 2 hours from now");
         }
 
-        Event event = EventMapper.toEvent(newEventDto);
-        event.setCategory(category);
-        event.setInitiator(initiator);
-        event.setCreatedOn(LocalDateTime.now());
-        event.setState(EventState.PENDING);
-
+        Event event = EventMapper.toEvent(newEventDto, category, initiator, LocalDateTime.now(), EventState.PENDING);
         return EventMapper.toFullDto(eventRepository.save(event));
     }
 
@@ -79,7 +79,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
 
-        event.setConfirmedRequests(eventRepository.countConfirmedRequests(eventId));
+        event.setConfirmedRequests(requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED));
         event.setViews(getViews(eventId));
 
         return EventMapper.toFullDto(event);
@@ -110,7 +110,7 @@ public class EventServiceImpl implements EventService {
         }
 
         Event updatedEvent = eventRepository.save(event);
-        updatedEvent.setConfirmedRequests(eventRepository.countConfirmedRequests(eventId));
+        updatedEvent.setConfirmedRequests(requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED));
         updatedEvent.setViews(getViews(eventId));
         return EventMapper.toFullDto(updatedEvent);
     }
@@ -141,7 +141,7 @@ public class EventServiceImpl implements EventService {
 
         updateEventFields(event, updateRequest);
         Event updatedEvent = eventRepository.save(event);
-        updatedEvent.setConfirmedRequests(eventRepository.countConfirmedRequests(eventId));
+        updatedEvent.setConfirmedRequests(requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED));
         updatedEvent.setViews(getViews(eventId));
         return EventMapper.toFullDto(updatedEvent);
     }
@@ -156,7 +156,7 @@ public class EventServiceImpl implements EventService {
         statsClient.postHit(createEndpointHit(request));
 
         event.setViews(getViews(eventId));
-        event.setConfirmedRequests(eventRepository.countConfirmedRequests(eventId));
+        event.setConfirmedRequests(requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED));
 
         return EventMapper.toFullDto(event);
     }
@@ -164,30 +164,24 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional(readOnly = true)
     public List<EventFullDto> getFullEvents(
-            List<Long> users,
-            List<String> states,
-            List<Long> categories,
-            LocalDateTime rangeStart,
-            LocalDateTime rangeEnd,
-            int from,
-            int size
+            AdminEventsRequestDto params
     ) {
 
         List<EventState> stateEnums = null;
-        if (states != null) {
-            stateEnums = states.stream()
+        if (params.getStates() != null) {
+            stateEnums = params.getStates().stream()
                     .map(EventState::valueOf)
                     .toList();
         }
 
-        PageRequest pageRequest = PageRequest.of(0, from + size);
+        PageRequest pageRequest = PageRequest.of(0, params.getFrom() + params.getSize());
 
         List<Event> events = eventRepository.findEventsByAdminFilters(
-                users,
+                params.getUsers(),
                 stateEnums,
-                categories,
-                rangeStart,
-                rangeEnd,
+                params.getCategories(),
+                params.getRangeStart(),
+                params.getRangeEnd(),
                 pageRequest
         );
 
@@ -196,8 +190,8 @@ public class EventServiceImpl implements EventService {
         Map<Long, Long> confirmedRequests = getConfirmedRequests(eventIds);
 
         return events.stream()
-                .skip(from)
-                .limit(size)
+                .skip(params.getFrom())
+                .limit(params.getSize())
                 .map(event -> {
                     EventFullDto dto = EventMapper.toFullDto(event);
                     dto.setViews(views.getOrDefault(event.getId(), 0L));
@@ -209,25 +203,20 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EventShortDto> getShortEvents(String text, List<Long> categories, Boolean paid,
-                                              LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                              Boolean onlyAvailable, String sort,
-                                              int from, int size, HttpServletRequest request) {
-        if (rangeStart == null && rangeEnd == null) {
-            rangeStart = LocalDateTime.now();
-        } else if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
+    public List<EventShortDto> getShortEvents(EventsRequestDto params) {
+        if (params.getRangeStart().isAfter(params.getRangeEnd())) {
             throw new ValidationException("Start date must be before end date");
         }
 
+        statsClient.postHit(createEndpointHit(params.getRequest()));
+
         PageRequest pageRequest = PageRequest.of(
-                0, from + size
+                0, params.getFrom() + params.getSize()
         );
-
         List<Event> events = eventRepository.findPublicEvents(
-                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, pageRequest
-        ).stream().skip(from).limit(size).toList();
-
-        statsClient.postHit(createEndpointHit(request));
+                params.getText(), params.getCategories(), params.getPaid(), params.getRangeStart(), params.getRangeEnd(),
+                params.getOnlyAvailable(), pageRequest
+        ).stream().skip(params.getFrom()).limit(params.getSize()).toList();
 
         if (events.isEmpty()) {
             return Collections.emptyList();
@@ -293,7 +282,7 @@ public class EventServiceImpl implements EventService {
         return eventIds.stream()
                 .collect(Collectors.toMap(
                         eventId -> eventId,
-                        eventRepository::countConfirmedRequests
+                        eventId -> requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED)
                 ));
     }
 

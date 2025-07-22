@@ -13,7 +13,6 @@ import ru.practicum.ewm.compilation.repository.CompilationRepository;
 import ru.practicum.ewm.error.NotFoundException;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.repository.EventRepository;
-import ru.practicum.stats.client.StatsClient;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -25,7 +24,6 @@ import java.util.Set;
 public class CompilationServiceImpl implements CompilationService {
     private final CompilationRepository compilationRepository;
     private final EventRepository eventRepository;
-    private final StatsClient statsClient;
 
     @Override
     @Transactional

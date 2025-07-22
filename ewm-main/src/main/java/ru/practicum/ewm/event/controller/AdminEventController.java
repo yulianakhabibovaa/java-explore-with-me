@@ -1,6 +1,5 @@
 package ru.practicum.ewm.event.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.ewm.event.dto.AdminEventsRequestDto;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.UpdateEventAdminRequest;
 import ru.practicum.ewm.event.service.EventService;
@@ -36,10 +36,19 @@ public class AdminEventController {
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(defaultValue = "10") @Positive Integer size,
-            HttpServletRequest request
+            @RequestParam(defaultValue = "10") @Positive Integer size
     ) {
-        return eventService.getFullEvents(users, states, categories, rangeStart, rangeEnd, from, size);
+        LocalDateTime start = (rangeStart != null) ? rangeStart : LocalDateTime.now();
+        LocalDateTime end = (rangeEnd != null) ? rangeEnd : LocalDateTime.now().plusYears(10);
+        AdminEventsRequestDto params = new AdminEventsRequestDto();
+        params.setUsers(users);
+        params.setStates(states);
+        params.setCategories(categories);
+        params.setRangeStart(start);
+        params.setRangeEnd(end);
+        params.setFrom(from);
+        params.setSize(size);
+        return eventService.getFullEvents(params);
     }
 
     @PatchMapping("/{eventId}")
