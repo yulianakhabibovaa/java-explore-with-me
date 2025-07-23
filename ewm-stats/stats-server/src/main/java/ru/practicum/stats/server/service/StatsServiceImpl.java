@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.stats.dto.EndpointHitDto;
 import ru.practicum.stats.dto.ViewStatsDto;
+import ru.practicum.stats.server.exception.BadRequestException;
 import ru.practicum.stats.server.mapper.StatsMapper;
 import ru.practicum.stats.server.model.EndpointHit;
 import ru.practicum.stats.server.repository.StatsRepository;
@@ -27,6 +28,9 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public Collection<ViewStatsDto> getStatistics(LocalDateTime start, LocalDateTime end, Collection<String> uris, Boolean unique) {
+        if (start == null || end == null || start.isAfter(end)) {
+            throw new BadRequestException("Некорректные входные данные");
+        }
         if (uris == null || uris.isEmpty()) {
             return StatsMapper.toViewStatsDtos(repository.findAllStats(start, end, unique));
         }

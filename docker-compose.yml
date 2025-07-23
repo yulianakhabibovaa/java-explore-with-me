@@ -61,6 +61,7 @@ services:
       - SPRING_DATASOURCE_DRIVER-CLASS-NAME=org.postgresql.Driver
     depends_on:
       - ewm-db
+      - stats-server
     restart: on-failure
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
