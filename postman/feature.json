@@ -1,0 +1,881 @@
+{
+	"info": {
+		"_postman_id": "d27a4d4a-1937-46a9-87eb-4ca0d62bd8e5",
+		"name": "Subscription Feature Test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "11624156"
+	},
+	"item": [
+		{
+			"name": "Create Test Users",
+			"item": [
+				{
+					"name": "Create Subscriber",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Subscriber created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    const user = pm.response.json();",
+									"    pm.expect(user.id).to.be.a('number');",
+									"    pm.collectionVariables.set(\"subscriber_id\", user.id);",
+									"    pm.collectionVariables.set(\"subscriber_name\", user.name);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test Subscriber\",\n    \"email\": \"subscriber_{{$timestamp}}@test.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Author",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Author created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    const user = pm.response.json();",
+									"    pm.expect(user.id).to.be.a('number');",
+									"    pm.collectionVariables.set(\"author_id\", user.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test Author\",\n    \"email\": \"author_{{$timestamp}}@test.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Category created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    const category = pm.response.json();",
+									"    pm.expect(category.id).to.be.a('number');",
+									"    pm.collectionVariables.set(\"category_id\", category.id);",
+									"    pm.collectionVariables.set(\"category_name\", category.name);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Категория{{$timestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Author Event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Author created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    const event = pm.response.json();",
+									"    pm.expect(event.id).to.be.a('number');",
+									"    pm.expect(event.category.name).to.eql(pm.collectionVariables.get(\"category_name\"))",
+									"    pm.collectionVariables.set(\"event_id\", event.id);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"annotation\": \"newEventFunnewEventFunnewEventFunnewEventFun\",\n    \"category\": {{category_id}},\n    \"description\": \"eventeventeventeventevent\",\n    \"eventDate\": \"2026-01-01 12:00:00\",\n    \"location\": {\n        \"lat\": 0.01,\n        \"lon\": 0.01\n    },\n    \"participantLimit\": 0,\n    \"requestModeration\" : true,\n    \"title\": \"mynewevent\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/{{author_id}}/events",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{author_id}}",
+								"events"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Publish Event By Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Author created\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    const event = pm.response.json();",
+									"    pm.expect(event.id).to.be.a('number');",
+									"    pm.expect(event.state).to.eql(\"PUBLISHED\")",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"annotation\": \"newEventFunnewEventFunnewEventFunnewEventFun\",\n    \"category\": {{category_id}},\n    \"description\": \"eventeventeventeventevent\",\n    \"eventDate\": \"2026-01-01 12:00:00\",\n    \"location\": {\n        \"lat\": 0.01,\n        \"lon\": 0.01\n    },\n    \"paid\": true,\n    \"participantLimit\": 0,\n    \"requestModeration\" : true,\n    \"title\": \"mynewevent\",\n    \"stateAction\": \"PUBLISH_EVENT\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/events/{{event_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"events",
+								"{{event_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Subscription Tests",
+			"item": [
+				{
+					"name": "Subscribe to User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"authorId\": {{author_id}}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/{{subscriber_id}}/subscriptions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{subscriber_id}}",
+								"subscriptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Subscribe to Self (Negative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"Error message\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.status).to.include(\"subscribe to yourself\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"authorId\": {{subscriber_id}}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/{{subscriber_id}}/subscriptions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{subscriber_id}}",
+								"subscriptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Duplicate Subscription (Negative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409\", function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"pm.test(\"Conflict message\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.status).to.include(\"already exists\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"authorId\": {{author_id}}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/{{subscriber_id}}/subscriptions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{subscriber_id}}",
+								"subscriptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Subscriptions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Contains subscribed users\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"    pm.expect(response.length).to.be.above(0);",
+									"    pm.expect(response[0].id).to.eql(pm.collectionVariables.get(\"author_id\"));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/{{subscriber_id}}/subscriptions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{subscriber_id}}",
+								"subscriptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Feed",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Contains events from subscribed users\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"    pm.expect(response.length).to.be.above(0);",
+									"    pm.expect(response[0].initiator.id).to.eql(pm.collectionVariables.get(\"author_id\"));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/{{subscriber_id}}/subscriptions/feed?from=0&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{subscriber_id}}",
+								"subscriptions",
+								"feed"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Feed Of Unexisting User (Negative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"pm.test(\"Error message\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.status).to.include(\"not found\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/9999/subscriptions/feed?from=0&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"9999",
+								"subscriptions",
+								"feed"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Subscriptions Of Unexisting User (Negative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"pm.test(\"Error message\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.status).to.include(\"not found\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/9999/subscriptions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"9999",
+								"subscriptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Subscribers",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Contains author subscribers\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"    pm.expect(response.length).to.be.above(0);",
+									"    pm.expect(response[0].id).to.eql(pm.collectionVariables.get(\"subscriber_id\"));",
+									"    pm.expect(response[0].name).to.eql(pm.collectionVariables.get(\"subscriber_name\"));",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/{{author_id}}/subscribers",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{author_id}}",
+								"subscribers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unexisting User Subscribers (Negative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"pm.test(\"Error message\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.status).to.include(\"not found\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/9999/subscribers",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"9999",
+								"subscribers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unsubscribe",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/{{subscriber_id}}/subscriptions/{{author_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{subscriber_id}}",
+								"subscriptions",
+								"{{author_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unsubscribe Repeat (Negative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"pm.test(\"Error message\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.status).to.include(\"not found\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/{{subscriber_id}}/subscriptions/{{author_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{subscriber_id}}",
+								"subscriptions",
+								"{{author_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Subscriptions After Unsubscribe",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Subscription list is empty\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array').that.is.empty;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/{{subscriber_id}}/subscriptions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{subscriber_id}}",
+								"subscriptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Feed After Unsubscribe",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Subscription list is empty\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array').that.is.empty;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/{{subscriber_id}}/subscriptions/feed?from=0&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{subscriber_id}}",
+								"subscriptions",
+								"feed"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cleanup",
+			"item": [
+				{
+					"name": "Delete Subscriber",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/users/{{subscriber_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"users",
+								"{{subscriber_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Author",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/users/{{author_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"users",
+								"{{author_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Generate unique timestamp for emails",
+					"const timestamp = new Date().getTime();",
+					"pm.collectionVariables.set(\"timestamp\", timestamp);"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080"
+		},
+		{
+			"key": "subscriber_id",
+			"value": ""
+		},
+		{
+			"key": "author_id",
+			"value": ""
+		},
+		{
+			"key": "timestamp",
+			"value": ""
+		},
+		{
+			"key": "category_id",
+			"value": ""
+		},
+		{
+			"key": "category_name",
+			"value": ""
+		},
+		{
+			"key": "event_id",
+			"value": ""
+		},
+		{
+			"key": "subscriber_name",
+			"value": ""
+		}
+	]
+}
