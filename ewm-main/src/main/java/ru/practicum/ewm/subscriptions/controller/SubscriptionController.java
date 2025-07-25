@@ -24,12 +24,12 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/users/{userId}/subscriptions")
+@RequestMapping("/users/{userId}")
 @Validated
 public class SubscriptionController {
     private final SubscriptionService subscriptionService;
 
-    @PostMapping
+    @PostMapping("/subscriptions")
     @ResponseStatus(HttpStatus.CREATED)
     public void subscribe(
             @PathVariable Long userId,
@@ -37,7 +37,7 @@ public class SubscriptionController {
         subscriptionService.subscribe(userId, request.getAuthorId());
     }
 
-    @DeleteMapping("/{authorId}")
+    @DeleteMapping("/subscriptions/{authorId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void unsubscribe(
             @PathVariable Long userId,
@@ -45,16 +45,26 @@ public class SubscriptionController {
         subscriptionService.unsubscribe(userId, authorId);
     }
 
-    @GetMapping
+    @GetMapping("/subscriptions")
     public List<UserDto> getSubscriptions(@PathVariable Long userId) {
         return subscriptionService.getSubscriptions(userId);
     }
 
-    @GetMapping("/feed")
+    @GetMapping("/subscriptions/feed")
     public List<EventShortDto> getFeed(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "0") @Min(0) Integer from,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer size) {
         return subscriptionService.getFeed(userId, from, size);
+    }
+
+    @GetMapping("/subscribers")
+    @ResponseStatus(HttpStatus.OK)
+    public List<UserDto> getUserSubscribers(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") @Min(0) int from,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
+
+        return subscriptionService.getUserSubscribers(userId, from, size);
     }
 }

@@ -112,4 +112,20 @@ public class SubscriptionService {
                 .map(EventMapper::toShortDto)
                 .toList();
     }
+
+    public List<UserDto> getUserSubscribers(Long userId, int from, int size) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User with id " + userId + " not found");
+        }
+
+        Pageable pageable = PageRequest.of(0, from + size);
+        Page<Subscription> subscriptions = subscriptionRepository.findByAuthorId(userId, pageable);
+
+        return subscriptions.getContent().stream()
+                .skip(from)
+                .limit(size)
+                .map(Subscription::getSubscriber)
+                .map(UserMapper::toUserDto)
+                .toList();
+    }
 }
