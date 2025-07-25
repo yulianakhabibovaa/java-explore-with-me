@@ -3,12 +3,20 @@ package ru.practicum.ewm.subscriptions.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.error.ConflictException;
 import ru.practicum.ewm.error.NotFoundException;
 import ru.practicum.ewm.error.ValidationException;
 import ru.practicum.ewm.event.dto.EventShortDto;
-import ru.practicum.ewm.event.service.EventService;
+import ru.practicum.ewm.event.dto.EventSpecs;
+import ru.practicum.ewm.event.mapper.EventMapper;
+import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.model.EventState;
+import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.subscriptions.model.Subscription;
 import ru.practicum.ewm.subscriptions.repository.SubscriptionRepository;
 import ru.practicum.ewm.user.dto.UserDto;
@@ -26,7 +34,7 @@ import java.util.List;
 public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final UserRepository userRepository;
-    private final EventService eventService;
+    private final EventRepository eventRepository;
 
     @Transactional
     public void subscribe(Long subscriberId, Long authorId) {
@@ -80,12 +88,28 @@ public class SubscriptionService {
             throw new NotFoundException("User with id " + subscriberId + " not found");
         }
 
-        List<Long> authorIds = subscriptionRepository.findAuthorIdsBySubscriberId(subscriberId);
+        List<Long> authorIds = subscriptionRepository.findAuthorIdsBySubscriberId(subscriberId).stream()
+                .map(sub -> sub.getAuthor().getId())
+                .toList();
 
         if (authorIds.isEmpty()) {
             return Collections.emptyList();
         }
 
-        return eventService.getPublishedEventsByAuthors(authorIds, from, size);
+        Specification<Event> spec = Specification.where(
+                EventSpecs.hasInitiatorIds(authorIds)
+                        .and(EventSpecs.hasState(EventState.PUBLISHED))
+                        .and(EventSpecs.eventDateAfter(LocalDateTime.now()))
+        );
+
+        Pageable pageable = PageRequest.of(0, from + size);
+
+        Page<Event> events = eventRepository.findAll(spec, pageable);
+
+        return events.stream()
+                .skip(from)
+                .limit(size)
+                .map(EventMapper::toShortDto)
+                .toList();
     }
 }

@@ -2,10 +2,7 @@ package ru.practicum.ewm.event.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.category.model.Category;
@@ -17,7 +14,6 @@ import ru.practicum.ewm.error.ValidationException;
 import ru.practicum.ewm.event.dto.AdminEventsRequestDto;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
-import ru.practicum.ewm.event.dto.EventSpecs;
 import ru.practicum.ewm.event.dto.EventsRequestDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
 import ru.practicum.ewm.event.dto.UpdateEventAdminRequest;
@@ -237,25 +233,6 @@ public class EventServiceImpl implements EventService {
                     dto.setConfirmedRequests(confirmedRequests.getOrDefault(event.getId(), 0L));
                     return dto;
                 })
-                .toList();
-    }
-
-    @Override
-    public List<EventShortDto> getPublishedEventsByAuthors(List<Long> authorIds, int from, int size) {
-        Specification<Event> spec = Specification.where(
-                EventSpecs.hasInitiatorIds(authorIds)
-                        .and(EventSpecs.hasState(EventState.PUBLISHED))
-                        .and(EventSpecs.eventDateAfter(LocalDateTime.now()))
-        );
-
-        Pageable pageable = PageRequest.of(0, from + size);
-
-        Page<Event> events = eventRepository.findAll(spec, pageable);
-
-        return events.stream()
-                .skip(from)
-                .limit(size)
-                .map(EventMapper::toShortDto)
                 .toList();
     }
 
