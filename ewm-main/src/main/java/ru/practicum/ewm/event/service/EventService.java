@@ -27,4 +27,6 @@ public interface EventService {
     List<EventFullDto> getFullEvents(AdminEventsRequestDto params);
 
     List<EventShortDto> getShortEvents(EventsRequestDto params);
+
+    List<EventShortDto> getPublishedEventsByAuthors(List<Long> authorIds, int from, int size);
 }

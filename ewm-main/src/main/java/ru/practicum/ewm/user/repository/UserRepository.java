@@ -1,5 +1,6 @@
 package ru.practicum.ewm.user.repository;
 
+import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,8 +14,9 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
-    @Query("SELECT u.id FROM User u WHERE u.id IN :ids")
-    Collection<Long> findExistingIds(@Param("ids") Collection<Long> ids);
+    boolean existsById(@NonNull Long id);
+
+    List<User> findByIdIn(Collection<Long> ids);
 
     @Query(value = "SELECT * FROM users ORDER BY id OFFSET :offset LIMIT :limit", nativeQuery = true)
     List<User> findUsersWithOffset(@Param("offset") int offset, @Param("limit") int limit);
